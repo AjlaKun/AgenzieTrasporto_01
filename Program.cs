@@ -85,7 +85,7 @@ namespace AgenzieTrasporto
         public string nome;
 
         public abstract void CreaControllore(int id, string fullName, string codice);
-        public abstract void CreaMezzo(int id, string codice, int numeroPosti, Controllore controllore);
+        public abstract void CreaMezzo(int id, string codice, Passegero[]posti, Controllore controllore);
         public abstract void AsociaControlloreAMezzo(Controllore controllore,Mezzo mezzo);
         
 
@@ -112,13 +112,13 @@ namespace AgenzieTrasporto
             controlloriTerrestre.Add(controlloreTerrestre);
 
         }
-        
-        public override void CreaMezzo(int id, string codice, int numeroPosti, Controllore controllore )
-        {
+
+        public override void CreaMezzo(int id, string codice, Passegero[] posti, Controllore controllore )
+        {   
             MezzoTerrestre treno = new MezzoTerrestre();
             treno.idMezzo = id;
             treno.codiceMezzo = codice;
-            treno.numeroPosti = numeroPosti;
+            treno.posti = posti;
             treno.controllore = controllore;
             mezziTerrestre.Add(treno);
         }
@@ -155,12 +155,12 @@ namespace AgenzieTrasporto
             controlloriMarittimi.Add(controlloreMarittimo);
 
         }
-        public override void CreaMezzo(int id, string codice, int numeroPosti, Controllore controllore)
+        public override void CreaMezzo(int id, string codice, Passegero[]posti, Controllore controllore)
         {
             MezzoMaritimo nave = new MezzoMaritimo();
             nave.idMezzo = id;
             nave.codiceMezzo = codice;
-            nave.numeroPosti = numeroPosti;
+            nave.posti = posti;
             nave.controllore = controllore;
             mezziMarittimi.Add(nave);
         }
@@ -209,12 +209,12 @@ namespace AgenzieTrasporto
             controlloreAereo.codiceControllore = codice;
             controlloriAereo.Add(controlloreAereo);
         }
-        public override void CreaMezzo(int id, string codice, int numeroPosti, Controllore controllore)
+        public override void CreaMezzo(int id, string codice, Passegero[]posti, Controllore controllore)
         {
             MezzoAereo aereo = new MezzoAereo();
             aereo.idMezzo = id;
             aereo.codiceMezzo = codice;
-            aereo.numeroPosti = numeroPosti;
+            aereo.posti = posti;
             aereo.controllore = controllore;
             mezziAereo.Add(aereo);
         }
@@ -257,8 +257,8 @@ namespace AgenzieTrasporto
     {
         public int idMezzo;
         public string codiceMezzo;
-        public int numeroPosti;
-        public List<string> Posti;
+        
+        public Passegero[] posti;
         public List<string> tratta; // puo contenere tutte le fermate o cita oppure fare un enumeratore
         public Controllore controllore;
         public List<Fermate> fermate; //questo e tratta, ogni volta quando creo mezzo aggiungo anche tratta di quello mezzo
@@ -306,20 +306,37 @@ namespace AgenzieTrasporto
             
         }
         public void  RicercaViaggio(string tragitto)
-        {   // qualcosa non va bene qua (if non va bene provo fare con switch)
-            foreach (Viaggio v in viaggi)
-            {
-               var result = v.traggito == tragitto;
+        {
+            //foreach (Viaggio v in viaggi)
+            //{
+            //   var result = v.traggito == tragitto;
 
-                if (result)
+            //    if (result)
+            //    {
+            //        Console.WriteLine("Il tragitto " + v.traggito + " è disponibile");
+            //        break;
+            //    }
+            //    else if (!result) { Console.WriteLine("Il tragitto " + tragitto + " non  è disponibile"); break; }
+
+
+            //}  
+
+            var querry = from Viaggio in viaggi where Viaggio.traggito == tragitto  select Viaggio;
+            foreach (Viaggio v in querry)
+            {
+                if (querry != null)
                 {
-                    Console.WriteLine("Il tragitto " + v.traggito + " è disponibile");
-                    break;
+
+                    Console.WriteLine("Viaggio " + v.traggito + " è disponibile per data " + v.data);
+                }else 
+                {
+
+                    Console.WriteLine("Viaggio " + tragitto + "non è disponibile");
+
+
                 }
-                else if (!result) { Console.WriteLine("Il tragitto " + tragitto + " non  è disponibile"); break; }
-                
-                
-            }  
+
+            }
         }
 
         public void TuttiViaggiDisponibili()
@@ -376,50 +393,61 @@ namespace AgenzieTrasporto
 
         }
 
+        public void CercaTrattaPerData(string tratta)
+        {
+            var querry = from Viaggio in viaggi where Viaggio.traggito == tratta select Viaggio;
+            foreach (Viaggio v in querry)
+            {
+                if (v != null)
+                    Console.WriteLine("Viaggio " + v.traggito + " è disponibile per data " + v.data);
+                else Console.WriteLine("Viaggio non disponibile");
+            }
+
+        }
+
     }
 
     internal class Program
     {
         static void Main(string[] args)
         {
-           
+
 
             //BIGLETERIA
             Biglietteria biglietteria = new Biglietteria();
             //creare oggetti agenzie
             AgenziaTerrestre agenziaTerrestre = new AgenziaTerrestre("ITerrestre");
             AgenziaMaritimo agenziaMarritimo = new AgenziaMaritimo("ITMarritimo");
-            AgenziaAereo agenziaAereo = new AgenziaAereo("ITAereo"); 
+            AgenziaAereo agenziaAereo = new AgenziaAereo("ITAereo");
 
             //aggiungere oggetti agenzie in lista agenzie
-            biglietteria.agenzie.Add(agenziaTerrestre);   
-            biglietteria.agenzie.Add(agenziaMarritimo);   
+            biglietteria.agenzie.Add(agenziaTerrestre);
+            biglietteria.agenzie.Add(agenziaMarritimo);
             biglietteria.agenzie.Add(agenziaAereo);
 
             //AGENZIA TERRESTRE creare controllori e mezzi
-            agenziaTerrestre.CreaControllore(1,"Mario Rossi","CT0001");
-            agenziaTerrestre.CreaMezzo(1, "MT0001", 20, agenziaTerrestre.controlloriTerrestre[0]);
-            agenziaTerrestre.CreaControllore(2,"Alessio Ragni","CT0002");
-            agenziaTerrestre.CreaMezzo(2, "MT0002", 30, agenziaTerrestre.controlloriTerrestre[1]);
+            agenziaTerrestre.CreaControllore(1, "Mario Rossi", "CT0001");
+            agenziaTerrestre.CreaMezzo(1, "MT0001", new Passegero[10], agenziaTerrestre.controlloriTerrestre[0]);
+            agenziaTerrestre.CreaControllore(2, "Alessio Ragni", "CT0002");
+            agenziaTerrestre.CreaMezzo(2, "MT0002", new Passegero[10], agenziaTerrestre.controlloriTerrestre[1]);
 
             //AGENZIA MARITTIMA creare controllori e mezzi
-            agenziaMarritimo.CreaControllore(1,"Nicola Rossi","CM0001");
-            agenziaMarritimo.CreaMezzo(1, "MM0001", 200, agenziaMarritimo.controlloriMarittimi[0]);
-            agenziaMarritimo.CreaControllore(2,"Stefano Ragni","CM0002");
-            agenziaMarritimo.CreaMezzo(2, "MM0002", 200, agenziaMarritimo.controlloriMarittimi[1]);
+            agenziaMarritimo.CreaControllore(1, "Nicola Rossi", "CM0001");
+            agenziaMarritimo.CreaMezzo(1, "MM0001", new Passegero[10], agenziaMarritimo.controlloriMarittimi[0]);
+            agenziaMarritimo.CreaControllore(2, "Stefano Ragni", "CM0002");
+            agenziaMarritimo.CreaMezzo(2, "MM0002", new Passegero[10], agenziaMarritimo.controlloriMarittimi[1]);
 
             //AGENZIA AEREO creare controllori e mezzi
-            agenziaAereo.CreaControllore(1,"Anna Rossi","CA0001");
-            agenziaAereo.CreaMezzo(1, "MA0001", 100, agenziaTerrestre.controlloriTerrestre[0]);
-            agenziaAereo.CreaControllore(2,"Sara Ragni","CA0002");
-            agenziaAereo.CreaMezzo(2, "MA0002", 100, agenziaTerrestre.controlloriTerrestre[1]);
+            agenziaAereo.CreaControllore(1, "Anna Rossi", "CA0001");
+            agenziaAereo.CreaMezzo(1, "MA0001", new Passegero[10], agenziaTerrestre.controlloriTerrestre[0]);
+            agenziaAereo.CreaControllore(2, "Sara Ragni", "CA0002");
+            agenziaAereo.CreaMezzo(2, "MA0002", new Passegero[10], agenziaTerrestre.controlloriTerrestre[1]);
 
 
             //creare dei viaggi con i propo dati
-            biglietteria.CreaViaggio(1,"MILANO - ROMA", 50.5M, new  DateTime (2022,08,04, 10,20,01), biglietteria.agenzie[0].nome,agenziaTerrestre.mezziTerrestre[0]); 
-            biglietteria.CreaViaggio(2,"GENOVA - TUNIS", (300M), new DateTime(2022,09,10, 12,10,02), biglietteria.agenzie[1].nome, agenziaMarritimo.mezziMarittimi[0]);
-            biglietteria.CreaViaggio(3,"MILANO - NEWYORK", 500M, new DateTime(2022,04,25,01,30,01), biglietteria.agenzie[2].nome, agenziaAereo.mezziAereo[0]);
-            //cercare il viaggio per data 
+            biglietteria.CreaViaggio(1, "MILANO - ROMA", 50.5M, new DateTime(2022, 08, 04, 10, 20, 01), biglietteria.agenzie[0].nome, agenziaTerrestre.mezziTerrestre[0]);
+            biglietteria.CreaViaggio(2, "GENOVA - TUNIS", (300M), new DateTime(2022, 09, 10, 12, 10, 02), biglietteria.agenzie[1].nome, agenziaMarritimo.mezziMarittimi[0]);
+            biglietteria.CreaViaggio(3, "MILANO - NEWYORK", 500M, new DateTime(2022, 04, 25, 01, 30, 01), biglietteria.agenzie[2].nome, agenziaAereo.mezziAereo[0]);
 
             #region POSSIBILITA DI CERCARE VIAGGI E VEDERE TUTTI VIAGGI DISPONIBILI CON I PREZZI
             //utente sta faccendo la ricerca e fa vedere tutti i viaggi disponibili
@@ -431,6 +459,7 @@ namespace AgenzieTrasporto
             Console.WriteLine(" Inserisci destinazione ");
             string destinazione = Console.ReadLine();
             string ricercaViaggio = partenza + " - " + destinazione;
+            
 
             //ricerca viaggo disponibile passando tragitto // dopo quando agiungo piu viaggi faccio anche per prezzo
             biglietteria.RicercaViaggio(ricercaViaggio.ToUpper());
@@ -632,7 +661,7 @@ namespace AgenzieTrasporto
             
            
 
-
+            
 
 
 
