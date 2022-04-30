@@ -175,13 +175,17 @@ namespace AgenzieTrasporto
         }
         public void CheckIn( string codiceBiglietto, Passegero passegero) 
         {
-            foreach (Biglietto b in bigliettiMarittimi)
+            var querry = from Biglietto in bigliettiMarittimi where Biglietto.codiceBiglietto == codiceBiglietto select Biglietto;
+            foreach (Biglietto b in querry)
             {
-                if (b.codiceBiglietto == codiceBiglietto)
+                if (querry != null)
                 {
                     Console.WriteLine("Codice biglietto trovato nella banca dati. CHECK IN AVENUTO CON SUCESSO!");
                 }
-                else { Console.WriteLine("Codice non trovato non puoi fare check in."); }
+                else
+                {
+                    Console.WriteLine("Codice non trovato non puoi fare check in.");
+                }
             }
         }
         public override void AsociaControlloreAMezzo(Controllore controllore, Mezzo mezzo)
@@ -231,13 +235,18 @@ namespace AgenzieTrasporto
         public void CheckIn(string  codiceBiglietto, Passegero passegero)
         {
             //CERCARE IN LIST Biglietti NUMERO BIGLIETTO E CONFRONTARLO CON BIGLIETTO PASSSATO
-            foreach (Biglietto b in bigliettiAerei)
+
+            var querry = from Biglietto in bigliettiAerei where Biglietto.codiceBiglietto == codiceBiglietto select Biglietto;
+            foreach (Biglietto b in querry)
             {
-                if (b.codiceBiglietto == codiceBiglietto)
+                if (querry != null)
                 {
                     Console.WriteLine("Codice biglietto trovato nella banca dati. CHECK IN AVENUTO CON SUCESSO!");
                 }
-                else { Console.WriteLine("Codice non trovato non puoi fare check in."); }
+                else
+                {
+                    Console.WriteLine("Codice non trovato non puoi fare check in.");
+                }
             }
         }
         public override void AsociaControlloreAMezzo(Controllore controllore, Mezzo mezzo)
@@ -288,6 +297,7 @@ namespace AgenzieTrasporto
 
     public class Biglietteria
     {
+        int i = 0;
         public List<Viaggio> viaggi = new List<Viaggio>(); 
         public List<AgenziaNazionale> agenzie = new List<AgenziaNazionale>();   
         public List<Biglietto> tuttiTipiDiBiglietti = new List<Biglietto>();   
@@ -374,17 +384,17 @@ namespace AgenzieTrasporto
         //    //posto
 
         //}
-
-        public void CreaBiglietto(int idBigletto, string codiceBiglietto,DateTime dataCreazione,Passegero passegero, Viaggio viaggio)
+        public readonly Random rnd = new Random();
+        public void CreaBiglietto(DateTime dataCreazione,Passegero passegero, Viaggio viaggio)
         {
             Biglietto biglietto = new Biglietto();
-            biglietto.idBiglietto = idBigletto;
-            biglietto.codiceBiglietto = codiceBiglietto;
+            biglietto.codiceBiglietto = rnd.Next(1000,5000).ToString();
             biglietto.dataCreazioneBiglietto = dataCreazione;
             biglietto.passegero = passegero;
             biglietto.viaggio = viaggio;
+            i++;
+            biglietto.idBiglietto = i;
             tuttiTipiDiBiglietti.Add(biglietto);
-
 
         }
 
@@ -439,9 +449,9 @@ namespace AgenzieTrasporto
 
             //AGENZIA AEREO creare controllori e mezzi
             agenziaAereo.CreaControllore(1, "Anna Rossi", "CA0001");
-            agenziaAereo.CreaMezzo(1, "MA0001", new Passegero[10], agenziaTerrestre.controlloriTerrestre[0]);
+            agenziaAereo.CreaMezzo(1, "MA0001", new Passegero[10], agenziaAereo.controlloriAereo[0]);
             agenziaAereo.CreaControllore(2, "Sara Ragni", "CA0002");
-            agenziaAereo.CreaMezzo(2, "MA0002", new Passegero[10], agenziaTerrestre.controlloriTerrestre[1]);
+            agenziaAereo.CreaMezzo(2, "MA0002", new Passegero[10], agenziaAereo.controlloriAereo[1]);
 
 
             //creare dei viaggi con i propo dati
@@ -484,8 +494,24 @@ namespace AgenzieTrasporto
             string fullName =Console.ReadLine();
             //creare passegero
             Passegero passegero1 = new Passegero(1, fullName, "PA54261", 12345675, 1234);
+            ProcediConAquisto(passegero1,biglietteria,agenziaAereo,agenziaMarritimo,agenziaTerrestre);
+            Console.WriteLine("Inserisci tuo nome e cognome");
+            string fulllName = Console.ReadLine();
+            Passegero passegero2 = new Passegero(2, fulllName,"PA214353",1234567,3333);
+            ProcediConAquisto(passegero2, biglietteria, agenziaAereo, agenziaMarritimo, agenziaTerrestre);
+            Console.WriteLine("Compra un altro biglietto");
+            ProcediConAquisto(passegero2, biglietteria, agenziaAereo, agenziaMarritimo, agenziaTerrestre);
 
-            Console.WriteLine("Buongiorno " + passegero1.fullName + " questi sono tutti viaggi che si possono comprare in questa biglietteria");
+
+
+
+
+
+        }
+        public static void ProcediConAquisto(Passegero passegero, Biglietteria biglietteria,
+            AgenziaAereo agenziaAereo, AgenziaMaritimo agenziaMaritimo,AgenziaTerrestre agenziaTerrestre)
+        {
+            Console.WriteLine("Buongiorno " + passegero.fullName + " questi sono tutti viaggi che si possono comprare in questa biglietteria");
             biglietteria.TuttiViaggiDisponibili();
             Console.WriteLine("");
             Console.WriteLine("Seleziona numero davanti tragitto per specificare qualle biglietto vuoi aquistare");
@@ -516,10 +542,10 @@ namespace AgenzieTrasporto
             #endregion
             int idInput = 0;
             bool validInput = false;
-            //vedere come creare piu passegeri di non ripetere sempre tutto ciclo while
+           
             while (!validInput)
             {
-                
+
                 Console.Write("\nDigita numero viaggio: ");
                 string viaggioSelezzionato = Console.ReadLine();
                 validInput = int.TryParse(viaggioSelezzionato, out idInput);
@@ -535,30 +561,31 @@ namespace AgenzieTrasporto
                 var terestre = biglietteria.viaggi.Where(v => v.agenziaNazionaleNome == "ITerrestre").FirstOrDefault();
 
                 //creare biglietto per determinato viaggio
-                biglietteria.CreaBiglietto(1, "B1234", DateTime.Now, passegero1, biglietteria.viaggi.Where(i => i.idViaggio == idInput).FirstOrDefault());
-                
+                //creare biglietto in automatico incrementare id e renderizare codice
+                biglietteria.CreaBiglietto( DateTime.Now, passegero, biglietteria.viaggi.Where(i => i.idViaggio == idInput).FirstOrDefault());
+
 
                 if (idInput == marittima.idViaggio)
                 {
                     Console.WriteLine("Aquista online");
                     Console.WriteLine("Digita pin");
-                    Console.WriteLine(passegero1.fullName + " ricordati che il tuo pin è " + passegero1.pin);
+                    Console.WriteLine(passegero.fullName + " ricordati che il tuo pin è " + passegero.pin);
                     int pin = Convert.ToInt32(Console.ReadLine());
-                    if (pin != passegero1.pin)
+                    if (pin != passegero.pin)
                     {
                         Console.WriteLine("Pin sbagliato riprova");
-                        while (pin != passegero1.pin)
+                        while (pin != passegero.pin)
                         { pin = Convert.ToInt32(Console.ReadLine()); }
                     }
-                    biglietteria.AquistaOnline(passegero1, biglietteria.viaggi.Where(i => i.idViaggio == idInput).FirstOrDefault());
+                    biglietteria.AquistaOnline(passegero, biglietteria.viaggi.Where(i => i.idViaggio == idInput).FirstOrDefault());
 
-                    agenziaMarritimo.SalvaBiglietto(biglietteria.tuttiTipiDiBiglietti.Where(b=>b.viaggio.idViaggio == idInput).FirstOrDefault());
-                    agenziaMarritimo.SalvaViaggio(biglietteria.viaggi.Where(i => i.idViaggio == idInput).FirstOrDefault());
+                    agenziaMaritimo.SalvaBiglietto(biglietteria.tuttiTipiDiBiglietti.Where(b => b.viaggio.idViaggio == idInput && b.passegero == passegero).FirstOrDefault());
+                    agenziaMaritimo.SalvaViaggio(biglietteria.viaggi.Where(i => i.idViaggio == idInput).FirstOrDefault());
                     Console.WriteLine("--------------------------------------------------------------------------------------------");
                     Console.WriteLine("QUESTI SONO I DATI DI TUO BIGLIETTO SEI PRONTO PER FARE CHECK IN");
-                    Console.WriteLine("BIGLIETTO DI:  " + passegero1.fullName);
+                    Console.WriteLine("BIGLIETTO DI:  " + passegero.fullName);
                     //faccio finta che per adesso un passegero puo comprare solo un biglietto
-                    foreach (Biglietto b in biglietteria.tuttiTipiDiBiglietti.Where(x => x.passegero == passegero1))
+                    foreach (Biglietto b in biglietteria.tuttiTipiDiBiglietti.Where(x => x.passegero == passegero))
                     {
                         Console.WriteLine("CODICE BIGLIETTO -> {0}, DATA AQUISTO -> {1}, PREZZO: {2}", b.codiceBiglietto, b.dataCreazioneBiglietto, b.viaggio.prezzo);
                         Console.WriteLine("TRAGITTO: {0}, AZIENDA: {1}", b.viaggio.traggito, b.viaggio.agenziaNazionaleNome);
@@ -567,66 +594,103 @@ namespace AgenzieTrasporto
                         Console.WriteLine("DATA E ORA DI PARTENZA -> {0}", b.viaggio.data);
                     }
                     Console.WriteLine("--------------------------------------------------------------------------------------------");
-
+                    
                     Console.WriteLine("STAI PER FARE CHECK IN");
                     Console.WriteLine("Per fare check in digita codice che vedi sul bigletto");
-                    string codiceInput =Console.ReadLine();
-                    agenziaMarritimo.CheckIn(codiceInput,passegero1);
+                    string codiceInput = Console.ReadLine();
+                    agenziaMaritimo.CheckIn(codiceInput, passegero);
 
                     Console.WriteLine("Per eventuali controlli sul bordo sei pregato di mostrare biglietto a controllore");
 
+                    Console.WriteLine("Controllo di bigletto in corso");
+                    Console.WriteLine("Digita codice del tuo biglietto");
+                    string cInputMarittimo = Console.ReadLine();
+
+                    var controlloreMarittimo = marittima.mezzo.controllore.codiceControllore;
+                    var biglettoMarittimo = biglietteria.tuttiTipiDiBiglietti.Where(b => b.viaggio.idViaggio == idInput && b.passegero == passegero).FirstOrDefault();
+                    foreach (Controllore c in agenziaMaritimo.controlloriMarittimi.Where(x => x.codiceControllore == controlloreMarittimo))
+                    {
+                        c.ControllaBigletto(cInputMarittimo);
+                        if (biglettoMarittimo.codiceBiglietto == cInputMarittimo) { Console.WriteLine("Controllo aprovato dal controllore " + c.fullName + " suo codicce identificativo è " + c.codiceControllore); }
+                        else { Console.WriteLine("Controllo non aprovato"); }
+                    }
 
                 }
-                else if (idInput == aereo.idViaggio) 
+                else if (idInput == aereo.idViaggio)
                 {
                     Console.WriteLine("Aquista online");
                     Console.WriteLine("Digita pin");
-                    Console.WriteLine(passegero1.fullName + " ricordati che il tuo pin è " + passegero1.pin);
+                    Console.WriteLine(passegero.fullName + " ricordati che il tuo pin è " + passegero.pin);
                     int pin = Convert.ToInt32(Console.ReadLine());
-                    if (pin != passegero1.pin)
+                    if (pin != passegero.pin)
                     {
                         Console.WriteLine("Pin sbagliato riprova");
-                        while (pin != passegero1.pin)
+                        while (pin != passegero.pin)
                         { pin = Convert.ToInt32(Console.ReadLine()); }
                     }
-                    biglietteria.AquistaOnline(passegero1, biglietteria.viaggi.Where(i => i.idViaggio == idInput).FirstOrDefault());
+                    biglietteria.AquistaOnline(passegero, biglietteria.viaggi.Where(i => i.idViaggio == idInput).FirstOrDefault());
                     agenziaAereo.SalvaViaggio(biglietteria.viaggi.Where(i => i.idViaggio == idInput).FirstOrDefault());
-                    agenziaAereo.SalvaBiglietto(biglietteria.tuttiTipiDiBiglietti.Where(b => b.viaggio.idViaggio == idInput).FirstOrDefault());
+                    //qusto non va bene perche se compro piu di uno biglietto del stesso viagio non mi salva diverso biglietto prende sempre primo
+                    agenziaAereo.SalvaBiglietto(biglietteria.tuttiTipiDiBiglietti.Where(b => b.viaggio.idViaggio == idInput && b.passegero ==passegero).FirstOrDefault());
                     Console.WriteLine("--------------------------------------------------------------------------------------------");
                     Console.WriteLine("QUESTI SONO I DATI DI TUO BIGLIETTO SEI PRONTO PER FARE CHECK IN");
-                    Console.WriteLine("BIGLIETTO DI:  " + passegero1.fullName);
+                    Console.WriteLine("BIGLIETTO DI:  " + passegero.fullName);
                     //faccio finta che per adesso un passegero puo comprare solo un biglietto
-                    foreach (Biglietto b in biglietteria.tuttiTipiDiBiglietti.Where(x => x.passegero == passegero1))
+                    foreach (Biglietto b in biglietteria.tuttiTipiDiBiglietti.Where(x => x.passegero == passegero))
                     {
                         Console.WriteLine("CODICE BIGLIETTO -> {0}, DATA AQUISTO -> {1}, PREZZO: {2}", b.codiceBiglietto, b.dataCreazioneBiglietto, b.viaggio.prezzo);
                         Console.WriteLine("TRAGITTO: {0}, AZIENDA: {1}", b.viaggio.traggito, b.viaggio.agenziaNazionaleNome);
                         Console.WriteLine("MEZZO: {0}", b.viaggio.mezzo.codiceMezzo);
                         Console.WriteLine("DATA E ORA DI PARTENZA -> {0}", b.viaggio.data);
                     }
+                    foreach (Biglietto b in biglietteria.tuttiTipiDiBiglietti )
+                    {
+                        Console.WriteLine(b.idBiglietto);
+                    }
+                    foreach (Biglietto b in agenziaAereo.bigliettiAerei )
+                    {
+                        Console.WriteLine(b.idBiglietto);
+                    }
                     Console.WriteLine("--------------------------------------------------------------------------------------------");
+                    Console.WriteLine("STAI PER FARE CHECK IN");
+                    Console.WriteLine("Per fare check in digita codice che vedi sul bigletto");
+                    string codiceInput = Console.ReadLine();
+                    agenziaAereo.CheckIn(codiceInput, passegero);
                     Console.WriteLine("Per eventuali controlli sul bordo sei pregato di mostrare biglietto a controllore");
 
+                    Console.WriteLine("Controllo di bigletto in corso");
+                    Console.WriteLine("Digita codice del tuo biglietto");
+                    string cInputAereo = Console.ReadLine();
+
+                    var controlloreAereo = aereo.mezzo.controllore.codiceControllore;
+                    var biglettoAereo = biglietteria.tuttiTipiDiBiglietti.Where(b => b.viaggio.idViaggio == idInput && b.passegero == passegero).FirstOrDefault();
+                    foreach (Controllore c in agenziaAereo.controlloriAereo.Where(x => x.codiceControllore == controlloreAereo))
+                    {
+                        c.ControllaBigletto(cInputAereo);
+                        if (biglettoAereo.codiceBiglietto == cInputAereo) { Console.WriteLine("Controllo aprovato dal controllore " + c.fullName + " suo codicce identificativo è " + c.codiceControllore); }
+                        else { Console.WriteLine("Controllo non aprovato"); }
+                    }
                 }
                 else if (idInput == terestre.idViaggio)
                 {
                     Console.WriteLine("Aquista in biglietteria");
                     Console.WriteLine("Digita pin");
-                    Console.WriteLine(passegero1.fullName + " ricordati che il tuo pin è " + passegero1.pin);
+                    Console.WriteLine(passegero.fullName + " ricordati che il tuo pin è " + passegero.pin);
                     int pin = Convert.ToInt32(Console.ReadLine());
-                    if (pin != passegero1.pin)
+                    if (pin != passegero.pin)
                     {
                         Console.WriteLine("Pin sbagliato riprova");
-                        while (pin != passegero1.pin)
+                        while (pin != passegero.pin)
                         { pin = Convert.ToInt32(Console.ReadLine()); }
                     }
-                    biglietteria.AquistaInBiglieteria(passegero1, biglietteria.viaggi.Where(i => i.idViaggio == idInput).FirstOrDefault());
+                    biglietteria.AquistaInBiglieteria(passegero, biglietteria.viaggi.Where(i => i.idViaggio == idInput).FirstOrDefault());
                     agenziaTerrestre.SalvaViaggio(biglietteria.viaggi.Where(i => i.idViaggio == idInput).FirstOrDefault());
-                    agenziaTerrestre.SalvaBiglietto(biglietteria.tuttiTipiDiBiglietti.Where(b => b.viaggio.idViaggio == idInput).FirstOrDefault());
+                    agenziaTerrestre.SalvaBiglietto(biglietteria.tuttiTipiDiBiglietti.Where(b => b.viaggio.idViaggio == idInput && b.passegero == passegero).FirstOrDefault());
                     Console.WriteLine("--------------------------------------------------------------------------------------------");
                     Console.WriteLine("QUESTI SONO I DATI DI TUO BIGLIETTO SEI PRONTO PER FARE CHECK IN");
-                    Console.WriteLine("BIGLIETTO DI:  " + passegero1.fullName);
-                    //faccio finta che per adesso un passegero puo comprare solo un biglietto
-                    foreach (Biglietto b in biglietteria.tuttiTipiDiBiglietti.Where(x => x.passegero == passegero1))
+                    Console.WriteLine("BIGLIETTO DI:  " + passegero.fullName);
+                    
+                    foreach (Biglietto b in biglietteria.tuttiTipiDiBiglietti.Where(x => x.passegero == passegero))
                     {
                         Console.WriteLine("CODICE BIGLIETTO -> {0}, DATA AQUISTO -> {1}, PREZZO: {2}", b.codiceBiglietto, b.dataCreazioneBiglietto, b.viaggio.prezzo);
                         Console.WriteLine("TRAGITTO: {0}, AZIENDA: {1}", b.viaggio.traggito, b.viaggio.agenziaNazionaleNome);
@@ -639,41 +703,24 @@ namespace AgenzieTrasporto
                     Console.WriteLine("Digita codice del tuo biglietto");
                     string cInput = Console.ReadLine();
 
-                    var controllore = terestre.mezzo.controllore.codiceControllore;
-                    var bigletto = biglietteria.tuttiTipiDiBiglietti.Where(b => b.viaggio.idViaggio == idInput).FirstOrDefault();
-                    foreach (Controllore c in agenziaTerrestre.controlloriTerrestre.Where(x=>x.codiceControllore == controllore))
+                    var controlloreTerrestre = terestre.mezzo.controllore.codiceControllore;
+                    var bigletto = biglietteria.tuttiTipiDiBiglietti.Where(b => b.viaggio.idViaggio == idInput && b.passegero == passegero).FirstOrDefault();
+                    foreach (Controllore c in agenziaTerrestre.controlloriTerrestre.Where(x => x.codiceControllore == controlloreTerrestre))
                     {
                         c.ControllaBigletto(cInput);
-                        if (bigletto.codiceBiglietto == cInput) { Console.WriteLine("Controllo aprovato dal controllore "+ c.fullName + " suo codicce identificativo è "+ c.codiceControllore); }
+                        if (bigletto.codiceBiglietto == cInput) { Console.WriteLine("Controllo aprovato dal controllore " + c.fullName + " suo codicce identificativo è " + c.codiceControllore); }
                         else { Console.WriteLine("Controllo non aprovato"); }
                     }
                 }
-                
-
-                
 
 
 
             }
 
-            
-
-            
-           
-
-            
-
-
-
-
-
-
-
-
-
-
 
         }
+
+
     }
    
 }
