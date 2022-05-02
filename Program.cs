@@ -85,7 +85,7 @@ namespace AgenzieTrasporto
         public string nome;
 
         public abstract void CreaControllore(int id, string fullName, string codice);
-        public abstract void CreaMezzo(int id, string codice, Passegero[]posti, Controllore controllore);
+        public abstract void CreaMezzo(int id, string codice, Dictionary<int,Passegero>postiPassegeri, Controllore controllore);
         public abstract void AsociaControlloreAMezzo(Controllore controllore,Mezzo mezzo);
         
 
@@ -113,12 +113,12 @@ namespace AgenzieTrasporto
 
         }
 
-        public override void CreaMezzo(int id, string codice, Passegero[] posti, Controllore controllore )
+        public override void CreaMezzo(int id, string codice, Dictionary<int, Passegero> postiPassegeri, Controllore controllore )
         {   
             MezzoTerrestre treno = new MezzoTerrestre();
             treno.idMezzo = id;
             treno.codiceMezzo = codice;
-            treno.posti = posti;
+            treno.postiPassegeri = postiPassegeri;
             treno.controllore = controllore;
             mezziTerrestre.Add(treno);
         }
@@ -155,12 +155,12 @@ namespace AgenzieTrasporto
             controlloriMarittimi.Add(controlloreMarittimo);
 
         }
-        public override void CreaMezzo(int id, string codice, Passegero[]posti, Controllore controllore)
+        public override void CreaMezzo(int id, string codice, Dictionary<int, Passegero> postiPassegeri, Controllore controllore)
         {
             MezzoMaritimo nave = new MezzoMaritimo();
             nave.idMezzo = id;
             nave.codiceMezzo = codice;
-            nave.posti = posti;
+            nave.postiPassegeri = postiPassegeri;
             nave.controllore = controllore;
             mezziMarittimi.Add(nave);
         }
@@ -213,12 +213,12 @@ namespace AgenzieTrasporto
             controlloreAereo.codiceControllore = codice;
             controlloriAereo.Add(controlloreAereo);
         }
-        public override void CreaMezzo(int id, string codice, Passegero[]posti, Controllore controllore)
+        public override void CreaMezzo(int id, string codice, Dictionary<int, Passegero> postiPassegeri, Controllore controllore)
         {
             MezzoAereo aereo = new MezzoAereo();
             aereo.idMezzo = id;
             aereo.codiceMezzo = codice;
-            aereo.posti = posti;
+            aereo.postiPassegeri = postiPassegeri;
             aereo.controllore = controllore;
             mezziAereo.Add(aereo);
         }
@@ -266,7 +266,7 @@ namespace AgenzieTrasporto
     {
         public int idMezzo;
         public string codiceMezzo;
-        
+        public Dictionary<int, Passegero> postiPassegeri; 
         public Passegero[] posti;
         public List<string> tratta; // puo contenere tutte le fermate o cita oppure fare un enumeratore
         public Controllore controllore;
@@ -437,21 +437,21 @@ namespace AgenzieTrasporto
 
             //AGENZIA TERRESTRE creare controllori e mezzi
             agenziaTerrestre.CreaControllore(1, "Mario Rossi", "CT0001");
-            agenziaTerrestre.CreaMezzo(1, "MT0001", new Passegero[10], agenziaTerrestre.controlloriTerrestre[0]);
+            agenziaTerrestre.CreaMezzo(1, "MT0001", new Dictionary<int, Passegero> {[1]= null,[2] = null, [3] = null,[4]=null, [5]= null, [6] = null, [7] = null, [8] = null, [9] = null, [10] = null }, agenziaTerrestre.controlloriTerrestre[0]);
             agenziaTerrestre.CreaControllore(2, "Alessio Ragni", "CT0002");
-            agenziaTerrestre.CreaMezzo(2, "MT0002", new Passegero[10], agenziaTerrestre.controlloriTerrestre[1]);
+            agenziaTerrestre.CreaMezzo(2, "MT0002", new Dictionary<int, Passegero> { [1] = null, [2] = null, [3] = null, [4] = null, [5] = null, [6] = null, [7] = null, [8] = null, [9] = null }, agenziaTerrestre.controlloriTerrestre[1]);
 
             //AGENZIA MARITTIMA creare controllori e mezzi
             agenziaMarritimo.CreaControllore(1, "Nicola Rossi", "CM0001");
-            agenziaMarritimo.CreaMezzo(1, "MM0001", new Passegero[10], agenziaMarritimo.controlloriMarittimi[0]);
+            agenziaMarritimo.CreaMezzo(1, "MM0001", new Dictionary<int, Passegero> { [1] = null, [2] = null, [3] = null, [4] = null, [5] = null, [6] = null, [7] = null, [8] = null }, agenziaMarritimo.controlloriMarittimi[0]);
             agenziaMarritimo.CreaControllore(2, "Stefano Ragni", "CM0002");
-            agenziaMarritimo.CreaMezzo(2, "MM0002", new Passegero[10], agenziaMarritimo.controlloriMarittimi[1]);
+            agenziaMarritimo.CreaMezzo(2, "MM0002", new Dictionary<int, Passegero> { [1] = null, [2] = null, [3] = null, [4] = null, [5] = null, [6] = null, [7] = null }, agenziaMarritimo.controlloriMarittimi[1]);
 
             //AGENZIA AEREO creare controllori e mezzi
             agenziaAereo.CreaControllore(1, "Anna Rossi", "CA0001");
-            agenziaAereo.CreaMezzo(1, "MA0001", new Passegero[10], agenziaAereo.controlloriAereo[0]);
+            agenziaAereo.CreaMezzo(1, "MA0001", new Dictionary<int, Passegero> { [1] = null, [2] = null, [3] = null, [4] = null, [5] = null,[6]=null }, agenziaAereo.controlloriAereo[0]);
             agenziaAereo.CreaControllore(2, "Sara Ragni", "CA0002");
-            agenziaAereo.CreaMezzo(2, "MA0002", new Passegero[10], agenziaAereo.controlloriAereo[1]);
+            agenziaAereo.CreaMezzo(2, "MA0002", new Dictionary<int, Passegero> { [1] = null, [2] = null, [3] = null, [4] = null, [5] = null }, agenziaAereo.controlloriAereo[1]);
 
 
             //creare dei viaggi con i propo dati
@@ -563,10 +563,37 @@ namespace AgenzieTrasporto
                 //creare biglietto per determinato viaggio
                 //creare biglietto in automatico incrementare id e renderizare codice
                 biglietteria.CreaBiglietto( DateTime.Now, passegero, biglietteria.viaggi.Where(i => i.idViaggio == idInput).FirstOrDefault());
-
+                var viaggio = biglietteria.viaggi.Where(x => x.idViaggio == idInput).FirstOrDefault();
+                var posti = viaggio.mezzo.postiPassegeri;
 
                 if (idInput == marittima.idViaggio)
                 {
+                    //controlare se ci sono posti dsponibili per questo viaggio
+                    ///se ci sono posti disponibili fare seglierre a passeero posto e asegnare passegero a quello posto
+                    foreach (KeyValuePair<int, Passegero> p in posti)
+                    {
+                        if (p.Value == null)
+                        {
+                            Console.WriteLine("Posto " + p.Key + " Disponibile");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Posto " + p.Key + " Non disponibile");
+                        }
+                    }
+                    Console.WriteLine("Segli posto digitando numero posto disponibile");
+                    var postoSelezionato = Convert.ToInt32(Console.ReadLine());
+                    
+                    foreach (KeyValuePair<int, Passegero> p in posti)
+                    {
+                        posti[postoSelezionato] = passegero;
+                    }
+                    Console.WriteLine();
+                    
+                    foreach (KeyValuePair<int, Passegero> p in posti.Where(c=>c.Key== postoSelezionato))
+                    {
+                        Console.WriteLine("Passegero " + p.Value.fullName + " tuo codice posto è " + p.Key);
+                    }
                     Console.WriteLine("Aquista online");
                     Console.WriteLine("Digita pin");
                     Console.WriteLine(passegero.fullName + " ricordati che il tuo pin è " + passegero.pin);
@@ -589,9 +616,10 @@ namespace AgenzieTrasporto
                     {
                         Console.WriteLine("CODICE BIGLIETTO -> {0}, DATA AQUISTO -> {1}, PREZZO: {2}", b.codiceBiglietto, b.dataCreazioneBiglietto, b.viaggio.prezzo);
                         Console.WriteLine("TRAGITTO: {0}, AZIENDA: {1}", b.viaggio.traggito, b.viaggio.agenziaNazionaleNome);
-                        //non ho assegnato posto a passegero
-                        Console.WriteLine("MEZZO: {0}", b.viaggio.mezzo.codiceMezzo);
+                        
+                        Console.WriteLine("MEZZO: {0}, CODICE POSTO -> {1}", b.viaggio.mezzo.codiceMezzo, postoSelezionato);
                         Console.WriteLine("DATA E ORA DI PARTENZA -> {0}", b.viaggio.data);
+                        //Console.WriteLine("DATA E ORA DI ARRIVO -> {0}", b.viaggio.dataArrivo);
                     }
                     Console.WriteLine("--------------------------------------------------------------------------------------------");
                     
@@ -618,6 +646,32 @@ namespace AgenzieTrasporto
                 }
                 else if (idInput == aereo.idViaggio)
                 {
+                    foreach (KeyValuePair<int, Passegero> p in posti)
+                    {
+                        if (p.Value == null)
+                        {
+                            Console.WriteLine("Posto " + p.Key + " Disponibile");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Posto " + p.Key + " Non disponibile");
+                        }
+                    }
+                    Console.WriteLine("Segli posto digitando numero posto disponibile");
+                    var postoSelezionato = Convert.ToInt32(Console.ReadLine());
+
+                    foreach (KeyValuePair<int, Passegero> p in posti)
+                    {
+                        posti[postoSelezionato] = passegero;
+                    }
+                    Console.WriteLine();
+
+                    foreach (KeyValuePair<int, Passegero> p in posti.Where(c => c.Key == postoSelezionato))
+                    {
+                        Console.WriteLine("Passegero " + p.Value.fullName + " tuo codice posto è " + p.Key);
+                    }
+
+
                     Console.WriteLine("Aquista online");
                     Console.WriteLine("Digita pin");
                     Console.WriteLine(passegero.fullName + " ricordati che il tuo pin è " + passegero.pin);
@@ -673,6 +727,32 @@ namespace AgenzieTrasporto
                 }
                 else if (idInput == terestre.idViaggio)
                 {
+                    foreach (KeyValuePair<int, Passegero> p in posti)
+                    {
+                        if (p.Value == null)
+                        {
+                            Console.WriteLine("Posto " + p.Key + " Disponibile");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Posto " + p.Key + " Non disponibile");
+                        }
+                    }
+                    Console.WriteLine("Segli posto digitando numero posto disponibile");
+                    var postoSelezionato = Convert.ToInt32(Console.ReadLine());
+
+                    foreach (KeyValuePair<int, Passegero> p in posti)
+                    {
+                        posti[postoSelezionato] = passegero;
+                    }
+                    Console.WriteLine();
+
+                    foreach (KeyValuePair<int, Passegero> p in posti.Where(c => c.Key == postoSelezionato))
+                    {
+                        Console.WriteLine("Passegero " + p.Value.fullName + " tuo codice posto è " + p.Key);
+                    }
+
+
                     Console.WriteLine("Aquista in biglietteria");
                     Console.WriteLine("Digita pin");
                     Console.WriteLine(passegero.fullName + " ricordati che il tuo pin è " + passegero.pin);
