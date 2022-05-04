@@ -697,7 +697,7 @@ namespace AgenzieTrasporto
                     {
                         Console.WriteLine("CODICE BIGLIETTO -> {0}, DATA AQUISTO -> {1}, PREZZO: {2}", b.codiceBiglietto, b.dataCreazioneBiglietto, b.viaggio.prezzo);
                         Console.WriteLine("TRAGITTO: {0}, AZIENDA: {1}", b.viaggio.traggito, b.viaggio.agenziaNazionaleNome);
-                        Console.WriteLine("MEZZO: {0}", b.viaggio.mezzo.codiceMezzo);
+                        Console.WriteLine("MEZZO: {0}, POSTO ->{1}", b.viaggio.mezzo.codiceMezzo,postoSelezionato);
                         Console.WriteLine("DATA E ORA DI PARTENZA -> {0}", b.viaggio.data);
                     }
                     foreach (Biglietto b in biglietteria.tuttiTipiDiBiglietti )
@@ -777,7 +777,15 @@ namespace AgenzieTrasporto
                     {
                         Console.WriteLine("CODICE BIGLIETTO -> {0}, DATA AQUISTO -> {1}, PREZZO: {2}", b.codiceBiglietto, b.dataCreazioneBiglietto, b.viaggio.prezzo);
                         Console.WriteLine("TRAGITTO: {0}, AZIENDA: {1}", b.viaggio.traggito, b.viaggio.agenziaNazionaleNome);
-                        Console.WriteLine("MEZZO: {0}", b.viaggio.mezzo.codiceMezzo);
+                        Console.WriteLine("MEZZO: {0}, POSTO->{1}", b.viaggio.mezzo.codiceMezzo,postoSelezionato);
+                        var mezzo = b.viaggio.mezzo.fermate;
+                        Console.WriteLine("MEZZO EFFETUERA LE FERMATE DI: ");
+                        foreach (Fermate f in mezzo)
+                        {
+                            
+                            Console.WriteLine(f);
+
+                        }
                         Console.WriteLine("DATA E ORA DI PARTENZA -> {0}", b.viaggio.data);
                     }
                     Console.WriteLine("--------------------------------------------------------------------------------------------");
