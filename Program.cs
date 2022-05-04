@@ -85,7 +85,7 @@ namespace AgenzieTrasporto
         public string nome;
 
         public abstract void CreaControllore(int id, string fullName, string codice);
-        public abstract void CreaMezzo(int id, string codice, Dictionary<int,Passegero>postiPassegeri, Controllore controllore);
+        public abstract void CreaMezzo(int id, string codice, Dictionary<int,Passegero>postiPassegeri, Controllore controllore, List<Fermate>fermate);
         public abstract void AsociaControlloreAMezzo(Controllore controllore,Mezzo mezzo);
         
 
@@ -113,13 +113,14 @@ namespace AgenzieTrasporto
 
         }
 
-        public override void CreaMezzo(int id, string codice, Dictionary<int, Passegero> postiPassegeri, Controllore controllore )
+        public override void CreaMezzo(int id, string codice, Dictionary<int, Passegero> postiPassegeri, Controllore controllore, List<Fermate> fermate)
         {   
             MezzoTerrestre treno = new MezzoTerrestre();
             treno.idMezzo = id;
             treno.codiceMezzo = codice;
             treno.postiPassegeri = postiPassegeri;
             treno.controllore = controllore;
+            treno.fermate = fermate;
             mezziTerrestre.Add(treno);
         }
         public void SalvaBiglietto(Biglietto biglietto)
@@ -155,13 +156,14 @@ namespace AgenzieTrasporto
             controlloriMarittimi.Add(controlloreMarittimo);
 
         }
-        public override void CreaMezzo(int id, string codice, Dictionary<int, Passegero> postiPassegeri, Controllore controllore)
+        public override void CreaMezzo(int id, string codice, Dictionary<int, Passegero> postiPassegeri, Controllore controllore, List<Fermate> fermate)
         {
             MezzoMaritimo nave = new MezzoMaritimo();
             nave.idMezzo = id;
             nave.codiceMezzo = codice;
             nave.postiPassegeri = postiPassegeri;
             nave.controllore = controllore;
+            nave.fermate = fermate;
             mezziMarittimi.Add(nave);
         }
 
@@ -213,13 +215,14 @@ namespace AgenzieTrasporto
             controlloreAereo.codiceControllore = codice;
             controlloriAereo.Add(controlloreAereo);
         }
-        public override void CreaMezzo(int id, string codice, Dictionary<int, Passegero> postiPassegeri, Controllore controllore)
+        public override void CreaMezzo(int id, string codice, Dictionary<int, Passegero> postiPassegeri, Controllore controllore, List<Fermate> fermate)
         {
             MezzoAereo aereo = new MezzoAereo();
             aereo.idMezzo = id;
             aereo.codiceMezzo = codice;
             aereo.postiPassegeri = postiPassegeri;
             aereo.controllore = controllore;
+            aereo.fermate = fermate;
             mezziAereo.Add(aereo);
         }
 
@@ -260,7 +263,7 @@ namespace AgenzieTrasporto
 
     public enum Fermate
     { 
-        MI,NA,TO,VE,NO,BO,CZ,CA,BZ
+        MI,NA,TO,VE,NO,BO,CZ,CA,BZ,FI,AR,RM
     }
     public abstract class Mezzo 
     {
@@ -437,21 +440,21 @@ namespace AgenzieTrasporto
 
             //AGENZIA TERRESTRE creare controllori e mezzi
             agenziaTerrestre.CreaControllore(1, "Mario Rossi", "CT0001");
-            agenziaTerrestre.CreaMezzo(1, "MT0001", new Dictionary<int, Passegero> {[1]= null,[2] = null, [3] = null,[4]=null, [5]= null, [6] = null, [7] = null, [8] = null, [9] = null, [10] = null }, agenziaTerrestre.controlloriTerrestre[0]);
+            agenziaTerrestre.CreaMezzo(1, "MT0001", new Dictionary<int, Passegero> {[1]= null,[2] = null, [3] = null,[4]=null, [5]= null, [6] = null, [7] = null, [8] = null, [9] = null, [10] = null }, agenziaTerrestre.controlloriTerrestre[0], new List<Fermate> {Fermate.MI,Fermate.BO,Fermate.FI,Fermate.RM });
             agenziaTerrestre.CreaControllore(2, "Alessio Ragni", "CT0002");
-            agenziaTerrestre.CreaMezzo(2, "MT0002", new Dictionary<int, Passegero> { [1] = null, [2] = null, [3] = null, [4] = null, [5] = null, [6] = null, [7] = null, [8] = null, [9] = null }, agenziaTerrestre.controlloriTerrestre[1]);
+            agenziaTerrestre.CreaMezzo(2, "MT0002", new Dictionary<int, Passegero> { [1] = null, [2] = null, [3] = null, [4] = null, [5] = null, [6] = null, [7] = null, [8] = null, [9] = null }, agenziaTerrestre.controlloriTerrestre[1], new List<Fermate> { });
 
             //AGENZIA MARITTIMA creare controllori e mezzi
             agenziaMarritimo.CreaControllore(1, "Nicola Rossi", "CM0001");
-            agenziaMarritimo.CreaMezzo(1, "MM0001", new Dictionary<int, Passegero> { [1] = null, [2] = null, [3] = null, [4] = null, [5] = null, [6] = null, [7] = null, [8] = null }, agenziaMarritimo.controlloriMarittimi[0]);
+            agenziaMarritimo.CreaMezzo(1, "MM0001", new Dictionary<int, Passegero> { [1] = null, [2] = null, [3] = null, [4] = null, [5] = null, [6] = null, [7] = null, [8] = null }, agenziaMarritimo.controlloriMarittimi[0], new List<Fermate> { });
             agenziaMarritimo.CreaControllore(2, "Stefano Ragni", "CM0002");
-            agenziaMarritimo.CreaMezzo(2, "MM0002", new Dictionary<int, Passegero> { [1] = null, [2] = null, [3] = null, [4] = null, [5] = null, [6] = null, [7] = null }, agenziaMarritimo.controlloriMarittimi[1]);
+            agenziaMarritimo.CreaMezzo(2, "MM0002", new Dictionary<int, Passegero> { [1] = null, [2] = null, [3] = null, [4] = null, [5] = null, [6] = null, [7] = null }, agenziaMarritimo.controlloriMarittimi[1], new List<Fermate> { });
 
             //AGENZIA AEREO creare controllori e mezzi
             agenziaAereo.CreaControllore(1, "Anna Rossi", "CA0001");
-            agenziaAereo.CreaMezzo(1, "MA0001", new Dictionary<int, Passegero> { [1] = null, [2] = null, [3] = null, [4] = null, [5] = null,[6]=null }, agenziaAereo.controlloriAereo[0]);
+            agenziaAereo.CreaMezzo(1, "MA0001", new Dictionary<int, Passegero> { [1] = null, [2] = null, [3] = null, [4] = null, [5] = null,[6]=null }, agenziaAereo.controlloriAereo[0], new List<Fermate> { });
             agenziaAereo.CreaControllore(2, "Sara Ragni", "CA0002");
-            agenziaAereo.CreaMezzo(2, "MA0002", new Dictionary<int, Passegero> { [1] = null, [2] = null, [3] = null, [4] = null, [5] = null }, agenziaAereo.controlloriAereo[1]);
+            agenziaAereo.CreaMezzo(2, "MA0002", new Dictionary<int, Passegero> { [1] = null, [2] = null, [3] = null, [4] = null, [5] = null }, agenziaAereo.controlloriAereo[1], new List<Fermate> { });
 
 
             //creare dei viaggi con i propo dati
